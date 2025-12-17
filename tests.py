@@ -128,16 +128,16 @@ def test10():
 
 def test11():
     pointer = pointer_to_object("a" * 4096) 
-    pointer.change_value("b")
+    backup_id1 = pointer.change_value("b")
     pointer2 = pointer_to_object("c" * 4097) 
-    pointer2.change_value("d")
+    backup_id2 = pointer2.change_value("d")
     var = "e" * 4097
     pointer3 = pointer_to_object(var) 
-    pointer3.change_value("f")
+    backup_id3 = pointer3.change_value("f")
     if "a" * 4096 == "b" and "c" * 4097 != "d" and var == "f":
-        mem_restore_last()
-        mem_restore_last()
-        mem_restore_last()
+        mem_restore(backup_id1)
+        mem_restore(backup_id2)
+        mem_restore(backup_id3)        
         return True
     else:
         return False
@@ -241,8 +241,40 @@ def test19():
     return False
 
 
+def test20():
+    class MyStruct(ctypes.Structure):
+        _fields_ = [("x", ctypes.c_int), ("y", ctypes.c_int)]
+
+    x = MyStruct(11, 22)
+    base_address = address_of(x, c_object = True)    
+    p = pointer_to_address(base_address + MyStruct.y.offset, ctype = ctypes.c_int)
+    if dereference(p).value == 22:
+        return True
+    else:
+        return False
+
+exec(r"""
 if __name__ == "__main__":
-    if test1() and test2() and test3() and test4() and test5() and test6() and test7() and test8() and test9() and test10() and test11() and test12() and test13() and test14() and test16() and test17() and test18() and test19():
+    if test1() and \
+       test2() and \
+       test3() and \
+       test4() and \
+       test5() and \
+       test6() and \
+       test7() and \
+       test8() and \
+       test9() and \
+       test10() and \
+       test11() and \
+       test12() and \
+       test13() and \
+       test14() and \
+       test16() and \
+       test17() and \
+       test18() and \
+       test19() and \
+       test20():
         print("[+] all tests are successful")
     else:
         print("some tests are failed")
+""")
