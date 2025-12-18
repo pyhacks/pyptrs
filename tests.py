@@ -52,14 +52,25 @@ def test3():
 
 
 def test4():
-    a = 24532
-    p = pointer_to_object(a)
-    c_memory = p._address
-    p2 = pointer_to_address(c_memory, ctype = ctypes.py_object)
-    if p2.dereference().value == a:
+    # This represents the pointer.
+    # Unlike other ctypes C data types, its "value" attribute doesn't represent its value (which is an address), instead it represents the pointed value.
+    # C implementation of this ctypes data type doesnt contain the actual python value, only points to it.
+    a = ctypes.py_object(10)
+    b = a.value
+    c = 20
+    p1 = pointer_to_address(address_of(b))
+    p2 = pointer_to_address(address_of(a, c_object = True), ctype = ctypes.py_object)
+    p3 = pointer_to_object(c)
+    p4 = pointer_to_address(p3._address, ctype = ctypes.py_object)
+    p5 = pointer_to_address(address_of(a, c_object = True))
+    p2.get_address() # address of PyObject*
+    addr_b1 = address_of(b)
+    addr_b2 = ctypes.cast(p2.get_address(), ctypes.POINTER(ctypes.c_void_p)).contents.value # value of PyObject*
+    p2.dereference() 
+    if addr_b1 == addr_b2 and p4.dereference().value == 20:
         return True
     else:
-        return False
+        return False    
 
 
 def test5():
@@ -251,7 +262,8 @@ def test20():
     if dereference(p).value == 22:
         return True
     else:
-        return False
+        return False 
+
 
 exec(r"""
 if __name__ == "__main__":
